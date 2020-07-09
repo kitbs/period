@@ -143,12 +143,12 @@ class PeriodCollectionTest extends TestCase
             Period::make('2018-01-25', '2018-01-31')
         );
 
-        $gaps = $collection->overlaps();
+        $overlaps = $collection->overlaps();
 
-        $this->assertCount(2, $gaps);
+        $this->assertCount(2, $overlaps);
 
-        $this->assertTrue($gaps[0]->equals(Period::make('2018-01-05', '2018-01-10')));
-        $this->assertTrue($gaps[1]->equals(Period::make('2018-01-12', '2018-01-15')));
+        $this->assertTrue($overlaps[0]->equals(Period::make('2018-01-05', '2018-01-10')));
+        $this->assertTrue($overlaps[1]->equals(Period::make('2018-01-12', '2018-01-15')));
     }
 
     /**

@@ -116,6 +116,33 @@ class PeriodCollection implements ArrayAccess, Iterator, Countable
     }
 
     /**
+     * @return static
+     */
+    public function overlaps(): PeriodCollection
+    {
+        $overlaps = static::make();
+        $comparisons = clone $this;
+
+        foreach ($this as $periodIndex => $period) {
+            foreach ($comparisons as $comparisonIndex => $comparison) {
+                if ($periodIndex >= $comparisonIndex) {
+                    continue;
+                }
+
+                $overlap = $period->overlapSingle($comparison);
+
+                if ($overlap === null) {
+                    continue;
+                }
+
+                $overlaps[] = $overlap;
+            }
+        }
+
+        return $overlaps;
+    }
+
+    /**
      * @param \Spatie\Period\Period $intersection
      *
      * @return static

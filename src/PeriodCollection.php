@@ -121,14 +121,8 @@ class PeriodCollection implements ArrayAccess, Iterator, Countable
     public function overlaps(): PeriodCollection
     {
         $overlaps = static::make();
-        $comparisons = clone $this;
 
-        foreach ($this as $periodIndex => $period) {
-            foreach ($comparisons as $comparisonIndex => $comparison) {
-                if ($periodIndex >= $comparisonIndex) {
-                    continue;
-                }
-
+        foreach ($this->uniquePairs() as [$period, $comparison]) {
                 $overlap = $period->overlapSingle($comparison);
 
                 if ($overlap === null) {
@@ -136,7 +130,6 @@ class PeriodCollection implements ArrayAccess, Iterator, Countable
                 }
 
                 $overlaps[] = $overlap;
-            }
         }
 
         return $overlaps;
@@ -230,5 +223,23 @@ class PeriodCollection implements ArrayAccess, Iterator, Countable
     public function isEmpty(): bool
     {
         return count($this->periods) === 0;
+    }
+
+    protected function uniquePairs(): array
+    {
+        $comparisons = clone $this;
+        $combinations = [];
+
+        foreach ($this as $periodIndex => $period) {
+            foreach ($comparisons as $comparisonIndex => $comparison) {
+                if ($periodIndex >= $comparisonIndex) {
+                    continue;
+                }
+
+                $combinations[] = [$period, $comparison];
+            }
+        }
+
+        return $combinations;
     }
 }

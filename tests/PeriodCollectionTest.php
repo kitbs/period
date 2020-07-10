@@ -154,6 +154,33 @@ class PeriodCollectionTest extends TestCase
     /**
      * @test
      *
+     * A           [========]
+     * B               [=========]
+     * C                      [=======]
+     * D                                   [=====]
+     *
+     * FLATTENED   [==================]    [=====]
+     */
+    public function it_can_flatten_a_collection()
+    {
+        $collection = new PeriodCollection(
+            Period::make('2018-01-01', '2018-01-10'),
+            Period::make('2018-01-05', '2018-01-15'),
+            Period::make('2018-01-12', '2018-01-20'),
+            Period::make('2018-01-25', '2018-01-31')
+        );
+
+        $flattened = $collection->flatten();
+
+        $this->assertCount(2, $flattened);
+
+        $this->assertTrue($flattened[0]->equals(Period::make('2018-01-01', '2018-01-20')));
+        $this->assertTrue($flattened[1]->equals(Period::make('2018-01-25', '2018-01-31')));
+    }
+
+    /**
+     * @test
+     *
      * A         [=====)
      * B         [=====)
      * C         [=====)

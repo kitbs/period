@@ -136,6 +136,17 @@ class PeriodCollection implements ArrayAccess, Iterator, Countable
     }
 
     /**
+     * @return static
+     */
+    public function flatten(): PeriodCollection
+    {
+        $boundaries = $this->boundaries();
+        $gaps = $this->gaps();
+
+        return $boundaries->diff(...$gaps);
+    }
+
+    /**
      * @param \Spatie\Period\Period $intersection
      *
      * @return static

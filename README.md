@@ -141,6 +141,8 @@ $periodCollection->boundaries(): ?Period
 
 ```php
 $periodCollection->gaps(): PeriodCollection
+$periodCollection->overlaps(): PeriodCollection
+$periodCollection->flatten(): PeriodCollection
 ```
 
 ### Comparing periods
@@ -274,7 +276,7 @@ $collection = new PeriodCollection(
 $boundaries = $collection->boundaries();
 ```
 
-**Gaps of a collection**: Get all the gaps of a collection.
+**Gaps of a collection**: Get all the gaps within a collection.
 
 ```php
 /*
@@ -294,6 +296,50 @@ $collection = new PeriodCollection(
 );
 
 $gaps = $collection->gaps();
+```
+
+**Overlaps of a collection**: Get all the overlaps within a collection.
+
+```php
+/**
+ * A           [========]
+ * B               [=========]
+ * C                      [=======]
+ * D                                   [=====]
+ *
+ * OVERLAPS        [====] [==]
+ */
+
+$collection = new PeriodCollection(
+    Period::make('2018-01-01', '2018-01-10'),
+    Period::make('2018-01-05', '2018-01-15'),
+    Period::make('2018-01-12', '2018-01-20'),
+    Period::make('2018-01-25', '2018-01-31')
+);
+
+$overlaps = $collection->overlaps();
+```
+
+**Flatten a collection**: Get a new collection where any overlapping periods are flattened into a single period and gaps are retained.
+
+```php
+/*
+ * A           [========]
+ * B               [=========]
+ * C                      [=======]
+ * D                                   [=====]
+ *
+ * FLATTENED   [==================]    [=====]
+ */
+
+$collection = new PeriodCollection(
+    Period::make('2018-01-01', '2018-01-10'),
+    Period::make('2018-01-05', '2018-01-15'),
+    Period::make('2018-01-12', '2018-01-20'),
+    Period::make('2018-01-25', '2018-01-31')
+);
+
+$flattened = $collection->flatten();
 ```
 
 **Overlap multiple collections**: Returns the overlap between collections. 

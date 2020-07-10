@@ -10,13 +10,13 @@ This package adds support for comparing multiple dates with each other.
 You can calculate the overlaps and differences between n-amount of periods,
 as well as some more basic comparisons between two periods.
 
-Periods can be constructed from any type of `DateTime` implementation, 
+Periods can be constructed from any type of `DateTime` implementation,
 making this package compatible with custom `DateTime` implementations like
 [Carbon](https://carbon.nesbot.com)
 (see [cmixin/enhanced-period](https://github.com/kylekatarnls/enhanced-period) to
 convert directly from and to CarbonPeriod).
 
-Periods are always immutable, there's never the worry about your input dates being changed. 
+Periods are always immutable, there's never the worry about your input dates being changed.
 
 This package is still a work in progress.
 
@@ -53,8 +53,8 @@ $period = new Period(
 )
 ```
 
-The static `::make` constructor can also take strings and other implementations of `DateTimeInterface`, 
-as well as an extra format string, in case the textual dates passed aren't of the format `Y-m-d` or `Y-m-d H:i:s`. 
+The static `::make` constructor can also take strings and other implementations of `DateTimeInterface`,
+as well as an extra format string, in case the textual dates passed aren't of the format `Y-m-d` or `Y-m-d H:i:s`.
 
 ```php
 $period = Period::make(
@@ -141,11 +141,13 @@ $periodCollection->boundaries(): ?Period
 
 ```php
 $periodCollection->gaps(): PeriodCollection
+$periodCollection->overlaps(): PeriodCollection
+$periodCollection->flatten(): PeriodCollection
 ```
 
 ### Comparing periods
 
-**Overlaps with any other period**: 
+**Overlaps with any other period**:
 This method returns a `PeriodCollection` multiple `Period` objects representing the overlaps.
 
 ```php
@@ -157,17 +159,17 @@ This method returns a `PeriodCollection` multiple `Period` objects representing 
  *
  * OVERLAP        [=]   [==]    [=]
  */
- 
+
 $a = Period::make('2018-01-01', '2018-01-31');
 $b = Period::make('2018-02-10', '2018-02-20');
 $c = Period::make('2018-03-01', '2018-03-31');
 
 $current = Period::make('2018-01-20', '2018-03-10');
 
-$overlaps = $current->overlap($a, $b, $c); 
+$overlaps = $current->overlap($a, $b, $c);
 ```
 
-**Overlap with all periods**: 
+**Overlap with all periods**:
 This method only returns one period where all periods overlap.
 
 ```php
@@ -186,8 +188,8 @@ $c = Period::make('2018-01-10', '2018-01-31');
 $overlap = $a->overlapAll($b, $c);
 ```
 
-**Diff between multiple periods**: 
-This method returns a `PeriodCollection` multiple `Period` objects 
+**Diff between multiple periods**:
+This method returns a `PeriodCollection` multiple `Period` objects
 representing the diffs between several periods and one.
 
 ```php
@@ -237,8 +239,8 @@ $b = Period::make('2018-02-01', '2018-02-15');
 $overlap = $a->touchesWith($b); // true
 ```
 
-**Gap**: Returns the gap between two periods. 
-If no gap exists, `null` is returned. 
+**Gap**: Returns the gap between two periods.
+If no gap exists, `null` is returned.
 
 ```php
 /*
@@ -263,7 +265,7 @@ $overlap = $a->gap($b); // Period('2018-02-01', '2018-02-04')
  *
  * BOUNDARIES  [======================================]
  */
- 
+
 $collection = new PeriodCollection(
     Period::make('2018-01-01', '2018-01-05'),
     Period::make('2018-01-10', '2018-01-15'),
@@ -274,7 +276,7 @@ $collection = new PeriodCollection(
 $boundaries = $collection->boundaries();
 ```
 
-**Gaps of a collection**: Get all the gaps of a collection.
+**Gaps of a collection**: Get all the gaps within a collection.
 
 ```php
 /*
@@ -296,7 +298,51 @@ $collection = new PeriodCollection(
 $gaps = $collection->gaps();
 ```
 
-**Overlap multiple collections**: Returns the overlap between collections. 
+**Overlaps of a collection**: Get all the overlaps within a collection.
+
+```php
+/**
+ * A           [========]
+ * B               [=========]
+ * C                      [=======]
+ * D                                   [=====]
+ *
+ * OVERLAPS        [====] [==]
+ */
+
+$collection = new PeriodCollection(
+    Period::make('2018-01-01', '2018-01-10'),
+    Period::make('2018-01-05', '2018-01-15'),
+    Period::make('2018-01-12', '2018-01-20'),
+    Period::make('2018-01-25', '2018-01-31')
+);
+
+$gaps = $collection->overlaps();
+```
+
+**Flatten a collection**: Get a new collection where any overlapping periods are flattened into a single period and gaps are retained.
+
+```php
+/*
+ * A           [========]
+ * B               [=========]
+ * C                      [=======]
+ * D                                   [=====]
+ *
+ * FLATTENED   [==================]    [=====]
+ */
+
+$collection = new PeriodCollection(
+    Period::make('2018-01-01', '2018-01-10'),
+    Period::make('2018-01-05', '2018-01-15'),
+    Period::make('2018-01-12', '2018-01-20'),
+    Period::make('2018-01-25', '2018-01-31')
+);
+
+$gaps = $collection->overlaps();
+```
+
+**Overlap multiple collections**: Returns the overlap between collections.
 This means an AND operation between collections, and an OR operation within the same collection.
 
 ```php
@@ -364,12 +410,12 @@ The following example:
 
 > Given two periods: `[2018-01-01, 2018-01-15]` and `[2018-01-15, 2018-01-31]`; do they overlap?
 
-At first glance the answer is "yes": they overlap on `2018-01-15`. 
-But what if the first period ends at `2018-01-15 10:00:00`, 
-while the second starts at `2018-01-15 15:00:00`? 
+At first glance the answer is "yes": they overlap on `2018-01-15`.
+But what if the first period ends at `2018-01-15 10:00:00`,
+while the second starts at `2018-01-15 15:00:00`?
 Now they don't anymore!
 
-This is why this package requires you to specify a precision with each period. 
+This is why this package requires you to specify a precision with each period.
 Only periods with the same precision can be compared.
 
 A more in-depth explanation on why precision is so important can be found [here](https://stitcher.io/blog/comparing-dates).
@@ -392,7 +438,7 @@ Precision::SECOND
 
 ### Boundaries
 
-By default, period comparisons are done with included boundaries. 
+By default, period comparisons are done with included boundaries.
 This means that these two periods overlap:
 
 ```php
